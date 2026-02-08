@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+*.spec
+aur/src/
+aur/pkg/
+aur/flyprint-git/
+aur/*.pkg.tar*
+aur/*.log
