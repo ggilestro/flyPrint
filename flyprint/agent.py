@@ -353,7 +353,7 @@ class FlyPrintAgent:
                     title=f"FlyPush Labels - Job {job_id[:8]}",
                     copies=copies,
                     page_size="w72h154",  # Dymo 11352
-                    dpi=72,
+                    dpi=300,
                 )
             else:
                 # Use PDF printing

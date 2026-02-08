@@ -270,15 +270,15 @@ class CupsPrinter:
             temp_path = f.name
 
         try:
-            # Use lpr command - image at 72 DPI matches CUPS default
+            # Use lpr with ppi option to tell CUPS the image resolution
+            # This maps pixels to physical size correctly on thermal printers
             cmd = ["lpr"]
             if name:
                 cmd.extend(["-P", name])
             cmd.extend(["-#", str(copies)])
             cmd.extend(["-o", f"PageSize={page_size}"])
-            cmd.extend(["-o", "scaling=100"])
-            cmd.extend(["-o", "fit-to-page=false"])
-            cmd.extend(["-o", "PrintQuality=Graphics"])
+            cmd.extend(["-o", f"ppi={dpi}"])
+            cmd.extend(["-o", "fit-to-page"])
             cmd.append(temp_path)
 
             logger.info(f"Print command: {' '.join(cmd)}")
