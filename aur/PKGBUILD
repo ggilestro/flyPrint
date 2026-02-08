@@ -1,6 +1,6 @@
 # Maintainer: Giorgio Gilestro <giorgio@gilest.ro>
 pkgname=flyprint-git
-pkgver=0.1.0.r15.g6acaf37
+pkgver=0.1.0.r1.gc06940d
 pkgrel=1
 pkgdesc="Local print agent for FlyPush label printing (system tray + headless)"
 arch=('any')
