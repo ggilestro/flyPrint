@@ -44,6 +44,23 @@ class FlyPrintConfig:
     copies: int = 1
     config_version: int = 0
 
+    @staticmethod
+    def _normalize_url(url: str) -> str:
+        """Normalize server URL: ensure HTTPS, strip trailing slash.
+
+        Args:
+            url: Raw server URL.
+
+        Returns:
+            str: Normalized URL.
+        """
+        url = url.strip().rstrip("/")
+        if url.startswith("http://"):
+            url = "https://" + url[7:]
+        elif not url.startswith("https://"):
+            url = "https://" + url
+        return url
+
     def is_configured(self) -> bool:
         """Check if the agent has been configured.
 
@@ -62,7 +79,7 @@ class FlyPrintConfig:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         core_data = {
-            "server_url": self.server_url,
+            "server_url": self._normalize_url(self.server_url),
             "api_key": self.api_key,
         }
 
@@ -146,8 +163,9 @@ class FlyPrintConfig:
             return cls()
 
         # Backward compatibility: old format has all fields in one file
+        raw_url = data.get("server_url", "")
         config = cls(
-            server_url=data.get("server_url", ""),
+            server_url=cls._normalize_url(raw_url) if raw_url else "",
             api_key=data.get("api_key", ""),
             printer_name=data.get("printer_name"),
             poll_interval=data.get("poll_interval", 5),
