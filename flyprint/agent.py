@@ -343,6 +343,7 @@ class FlyPrintAgent:
                 title=f"FlyPush Labels - Job {job_id[:8]}",
                 copies=copies,
                 orientation=self.config.orientation,
+                page_size=self.config.cups_page,
             )
 
             if success:

@@ -42,6 +42,7 @@ class FlyPrintConfig:
     orientation: int = 0
     code_type: str = "qr"
     copies: int = 1
+    cups_page: str = "w72h154"
     config_version: int = 0
 
     @staticmethod
@@ -106,6 +107,7 @@ class FlyPrintConfig:
             "orientation": self.orientation,
             "code_type": self.code_type,
             "copies": self.copies,
+            "cups_page": self.cups_page,
             "config_version": self.config_version,
         }
 
@@ -132,6 +134,8 @@ class FlyPrintConfig:
             self.code_type = data["code_type"]
         if "copies" in data:
             self.copies = data["copies"]
+        if "cups_page" in data:
+            self.cups_page = data["cups_page"]
         if "config_version" in data:
             self.config_version = data["config_version"]
 
@@ -174,6 +178,7 @@ class FlyPrintConfig:
             orientation=data.get("orientation", 0),
             code_type=data.get("code_type", "qr"),
             copies=data.get("copies", 1),
+            cups_page=data.get("cups_page", "w72h154"),
             config_version=data.get("config_version", 0),
         )
 
@@ -197,6 +202,8 @@ class FlyPrintConfig:
                     config.code_type = cached["code_type"]
                 if "copies" in cached:
                     config.copies = cached["copies"]
+                if "cups_page" in cached:
+                    config.cups_page = cached["cups_page"]
                 if "config_version" in cached:
                     config.config_version = cached["config_version"]
             except (json.JSONDecodeError, TypeError):

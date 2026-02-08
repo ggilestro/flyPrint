@@ -126,6 +126,7 @@ class Win32Printer:
         copies: int = 1,
         printer_name: str | None = None,
         orientation: int = 0,
+        page_size: str = "w72h154",
     ) -> bool:
         """Print a PDF document using ShellExecute.
 
@@ -138,6 +139,7 @@ class Win32Printer:
             copies: Number of copies.
             printer_name: Override printer name.
             orientation: Rotation in degrees (ignored on Windows - handled by driver).
+            page_size: CUPS page size (ignored on Windows - handled by driver).
 
         Returns:
             bool: True if print job was submitted successfully.

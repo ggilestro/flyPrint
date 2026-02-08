@@ -60,6 +60,7 @@ class PrinterBackend(Protocol):
         copies: int = 1,
         printer_name: str | None = None,
         orientation: int = 0,
+        page_size: str = "w72h154",
     ) -> bool:
         """Print a PDF document.
 
@@ -69,6 +70,7 @@ class PrinterBackend(Protocol):
             copies: Number of copies.
             printer_name: Override printer name.
             orientation: Rotation in degrees (0, 90, 180, 270).
+            page_size: CUPS page size (e.g., 'w72h154' for Dymo 11352).
 
         Returns:
             bool: True if print job was submitted successfully.
