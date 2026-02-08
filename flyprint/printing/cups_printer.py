@@ -275,9 +275,11 @@ class CupsPrinter:
                 cmd.extend(["-P", name])
             cmd.extend(["-#", str(copies)])
             cmd.extend(["-o", f"PageSize={page_size}"])
-            # Use natural-scaling=100 so CUPS reads the DPI from the PNG
-            # metadata and maps the image to its natural physical size
-            cmd.extend(["-o", "natural-scaling=100"])
+            # Reason: CUPS image filter treats 1 pixel = 1 point (1/72 inch)
+            # with scaling=100. Image MUST be at 72 DPI for correct sizing.
+            # Do NOT use natural-scaling, ppi, or fit-to-page - see PRINTING_NOTES.md
+            cmd.extend(["-o", "scaling=100"])
+            cmd.extend(["-o", "fit-to-page=false"])
             cmd.append(temp_path)
 
             logger.info(f"Print command: {' '.join(cmd)}")
