@@ -165,6 +165,7 @@ class CupsPrinter:
         copies: int = 1,
         printer_name: str | None = None,
         orientation: int = 0,
+        page_size: str = "w72h154",
     ) -> bool:
         """Print a PDF document.
 
@@ -174,6 +175,7 @@ class CupsPrinter:
             copies: Number of copies.
             printer_name: Override printer name.
             orientation: Rotation in degrees (0, 90, 180, 270).
+            page_size: CUPS page size (e.g., 'w72h154' for Dymo 11352).
 
         Returns:
             bool: True if print job was submitted successfully.
@@ -196,13 +198,23 @@ class CupsPrinter:
             temp_path = f.name
 
         try:
+            # Reason: PageSize MUST be set explicitly — without it, CUPS uses the
+            # printer's default media which may be larger, causing content to overflow
+            # onto multiple labels. See PRINTING_NOTES.md.
+            options = {
+                "copies": str(copies),
+                "PageSize": page_size,
+            }
+            if orientation != 0:
+                options["orientation-requested"] = str(cups_orientation)
+
             if self._connection and name:
                 # Use pycups
                 job_id = self._connection.printFile(
                     name,
                     temp_path,
                     title,
-                    {"copies": str(copies), "orientation-requested": str(cups_orientation)},
+                    options,
                 )
                 logger.info(f"Print job {job_id} submitted to {name}")
                 return True
@@ -211,14 +223,9 @@ class CupsPrinter:
                 cmd = ["lp", "-t", title, "-n", str(copies)]
                 if name:
                     cmd.extend(["-d", name])
-                # Set page size for Dymo 11352 labels - w72h154 (portrait: ~25mm x 54mm)
-                cmd.extend(["-o", "PageSize=w72h154"])
-                # Force 100% scaling (no resize)
-                cmd.extend(["-o", "scaling=100"])
-                cmd.extend(["-o", "fit-to-page=false"])
-                # Additional orientation if specified
-                if orientation != 0:
-                    cmd.extend(["-o", f"orientation-requested={cups_orientation}"])
+                for key, val in options.items():
+                    if key != "copies":
+                        cmd.extend(["-o", f"{key}={val}"])
                 cmd.append(temp_path)
 
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
