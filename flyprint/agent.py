@@ -324,42 +324,26 @@ class FlyPrintAgent:
         if not claimed:
             return False
 
-        # Try PNG first (better for Dymo thermal printers)
-        image_result = self.get_job_image(job_id)
-        use_png = image_result is not None
-
-        if use_png:
-            image_data, content_type = image_result
-            logger.debug(f"Got image data, content-type: {content_type}")
-        else:
-            # Fall back to PDF
-            logger.debug("PNG not available, falling back to PDF")
-            image_data = self.get_job_pdf(job_id)
-            if not image_data:
-                self.complete_job(
-                    job_id, success=False, error_message="Failed to download label data"
-                )
-                return False
+        # Reason: Use PDF (not PNG) for printing. PDF embeds 300 DPI content
+        # at correct physical dimensions; CUPS rasterizes at the printer's
+        # native DPI (300 for Dymo). PNG at 72 DPI was too low for barcodes.
+        pdf_data = self.get_job_pdf(job_id)
+        if not pdf_data:
+            self.complete_job(
+                job_id, success=False, error_message="Failed to download label PDF"
+            )
+            return False
 
         # Mark as printing
         self.start_job(job_id)
 
         try:
-            if use_png:
-                success = self.printer.print_png(
-                    image_data,
-                    title=f"FlyPush Labels - Job {job_id[:8]}",
-                    copies=copies,
-                    page_size="w72h154",  # Dymo 11352
-                    dpi=72,
-                )
-            else:
-                success = self.printer.print_pdf(
-                    image_data,
-                    title=f"FlyPush Labels - Job {job_id[:8]}",
-                    copies=copies,
-                    orientation=self.config.orientation,
-                )
+            success = self.printer.print_pdf(
+                pdf_data,
+                title=f"FlyPush Labels - Job {job_id[:8]}",
+                copies=copies,
+                orientation=self.config.orientation,
+            )
 
             if success:
                 self.complete_job(job_id, success=True)
