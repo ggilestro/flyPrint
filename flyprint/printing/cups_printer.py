@@ -275,9 +275,9 @@ class CupsPrinter:
                 cmd.extend(["-P", name])
             cmd.extend(["-#", str(copies)])
             cmd.extend(["-o", f"PageSize={page_size}"])
-            cmd.extend(["-o", "scaling=100"])
-            cmd.extend(["-o", "fit-to-page=false"])
-            cmd.extend(["-o", "PrintQuality=Graphics"])
+            # Use natural-scaling=100 so CUPS reads the DPI from the PNG
+            # metadata and maps the image to its natural physical size
+            cmd.extend(["-o", "natural-scaling=100"])
             cmd.append(temp_path)
 
             logger.info(f"Print command: {' '.join(cmd)}")
