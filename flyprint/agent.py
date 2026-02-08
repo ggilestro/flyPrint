@@ -324,45 +324,22 @@ class FlyPrintAgent:
         if not claimed:
             return False
 
-        # Try to get PNG image first (works better with Dymo printers)
-        image_result = self.get_job_image(job_id)
-        use_png = image_result is not None
-
-        if use_png:
-            image_data, content_type = image_result
-            logger.debug(f"Got image data, content-type: {content_type}")
-        else:
-            # Fall back to PDF
-            logger.debug("PNG not available, falling back to PDF")
-            image_data = self.get_job_pdf(job_id)
-            if not image_data:
-                self.complete_job(
-                    job_id, success=False, error_message="Failed to download label data"
-                )
-                return False
+        # Get PDF — reliable sizing since page dimensions are embedded
+        pdf_data = self.get_job_pdf(job_id)
+        if not pdf_data:
+            self.complete_job(job_id, success=False, error_message="Failed to download PDF")
+            return False
 
         # Mark as printing
         self.start_job(job_id)
 
-        # Print using appropriate method
         try:
-            if use_png:
-                # Use PNG printing for Dymo (avoids CUPS PDF scaling issues)
-                success = self.printer.print_png(
-                    image_data,
-                    title=f"FlyPush Labels - Job {job_id[:8]}",
-                    copies=copies,
-                    page_size="w72h154",  # Dymo 11352
-                    dpi=300,
-                )
-            else:
-                # Use PDF printing
-                success = self.printer.print_pdf(
-                    image_data,
-                    title=f"FlyPush Labels - Job {job_id[:8]}",
-                    copies=copies,
-                    orientation=self.config.orientation,
-                )
+            success = self.printer.print_pdf(
+                pdf_data,
+                title=f"FlyPush Labels - Job {job_id[:8]}",
+                copies=copies,
+                orientation=self.config.orientation,
+            )
 
             if success:
                 self.complete_job(job_id, success=True)

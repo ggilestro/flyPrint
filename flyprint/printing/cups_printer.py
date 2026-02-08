@@ -270,18 +270,14 @@ class CupsPrinter:
             temp_path = f.name
 
         try:
-            # CUPS treats 1 pixel = 1 point (1/72 inch) by default.
-            # For a 300 DPI image, we need scaling = 72/300 * 100 = 24%
-            # so the pixels map to the correct physical dimensions.
-            scaling = int(72 / dpi * 100)
-
             cmd = ["lpr"]
             if name:
                 cmd.extend(["-P", name])
             cmd.extend(["-#", str(copies)])
             cmd.extend(["-o", f"PageSize={page_size}"])
-            cmd.extend(["-o", f"scaling={scaling}"])
+            cmd.extend(["-o", "scaling=100"])
             cmd.extend(["-o", "fit-to-page=false"])
+            cmd.extend(["-o", "PrintQuality=Graphics"])
             cmd.append(temp_path)
 
             logger.info(f"Print command: {' '.join(cmd)}")
