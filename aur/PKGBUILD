@@ -1,6 +1,6 @@
 # Maintainer: Giorgio Gilestro <giorgio@gilest.ro>
 pkgname=flyprint-git
-pkgver=0.1.0.r1.gc06940d
+pkgver=0.1.0.r4.g43eb4fb
 pkgrel=1
 pkgdesc="Local print agent for FlyPush label printing (system tray + headless)"
 arch=('any')
@@ -10,12 +10,10 @@ depends=(
     'python>=3.10'
     'python-click'
     'python-requests'
-)
-optdepends=(
-    'python-pystray: system tray icon (GUI mode)'
-    'python-pillow: tray icon rendering (GUI mode)'
-    'python-pycups: CUPS printing support'
-    'tk: pairing dialog (GUI mode)'
+    'python-pystray'
+    'python-pillow'
+    'python-pycups'
+    'tk'
 )
 makedepends=(
     'git'
