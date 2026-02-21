@@ -42,9 +42,25 @@ This is the Android companion to the flyPrint Python agent, designed to run on A
 - Android SDK (API 26+, target 34)
 - Brother Mobile SDK JAR (optional — app compiles without it using stub)
 
-### Post-Scaffold Steps
+### Building with Docker (recommended)
 
-After cloning, the project needs a Gradle wrapper before it can build:
+No Android SDK required on the host machine:
+
+```bash
+cd flyprint-android
+
+# Build Docker image (one-time)
+docker build -t flyprint-android-build .
+
+# Build APK
+docker run --rm --user root -e GRADLE_USER_HOME=/tmp/gradle \
+  -v "$(pwd):/app" -w /app flyprint-android-build \
+  sh -c "gradle assembleDebug --no-daemon --project-cache-dir=/tmp/project-cache && chown -R $(id -u):$(id -g) /app/app/build"
+```
+
+The APK will be at `app/build/outputs/apk/debug/app-debug.apk`
+
+### Building with Android Studio
 
 ```bash
 cd flyprint-android
@@ -67,14 +83,6 @@ mkdir -p app/libs
 
 # 5. Install to connected device
 ./gradlew installDebug
-```
-
-### Build Commands
-
-```bash
-./gradlew assembleDebug       # Debug build
-./gradlew assembleRelease     # Release build (requires signing)
-./gradlew installDebug        # Install to connected device
 ```
 
 ## Project Structure

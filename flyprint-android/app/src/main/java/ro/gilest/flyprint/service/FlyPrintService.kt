@@ -77,14 +77,15 @@ class FlyPrintService : Service() {
     private val pollingRunnable = object : Runnable {
         override fun run() {
             if (!isPolling) return
+            val self = this
             serviceScope.launch {
                 val success = pollOnce()
                 // Reason: Reset backoff on success, double on failure (capped at 60s)
                 if (success) {
                     backoffDelay = config.pollInterval
-                    handler.postDelayed(this@pollingRunnable, config.pollInterval)
+                    handler.postDelayed(self, config.pollInterval)
                 } else {
-                    handler.postDelayed(this@pollingRunnable, backoffDelay)
+                    handler.postDelayed(self, backoffDelay)
                     backoffDelay = (backoffDelay * 2).coerceAtMost(maxBackoffDelay)
                 }
             }
