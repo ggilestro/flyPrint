@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FlyPrint</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_name">FlyPrint Service</string>
+    <string name="notification_channel_description">Shows when FlyPrint is polling for print jobs</string>
+    <string name="notification_title">FlyPrint Agent</string>
+    <string name="notification_polling">Polling for print jobs…</string>
+    <string name="notification_idle">Service running</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_title">FlyPrint Setup</string>
+    <string name="setup_server_url">Server URL</string>
+    <string name="setup_server_url_hint">https://flypush.example.com</string>
+    <string name="setup_api_key">API Key</string>
+    <string name="setup_api_key_hint">Paste your agent API key</string>
+    <string name="setup_printer">Printer</string>
+    <string name="setup_discover_printers">Discover Printers</string>
+    <string name="setup_no_printers">No printers found</string>
+    <string name="setup_save">Save &amp; Start</string>
+    <string name="setup_test_connection">Test Connection</string>
+    <string name="setup_step_server">Server</string>
+    <string name="setup_step_printer">Printer</string>
+    <string name="setup_step_done">Done</string>
+
+    <!-- Status Screen -->
+    <string name="status_title">FlyPrint Status</string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_service_running">Service Running</string>
+    <string name="status_service_stopped">Service Stopped</string>
+    <string name="status_printer">Printer</string>
+    <string name="status_server">Server</string>
+    <string name="status_last_heartbeat">Last Heartbeat</string>
+    <string name="status_jobs_processed">Jobs Processed</string>
+    <string name="status_start_service">Start Service</string>
+    <string name="status_stop_service">Stop Service</string>
+    <string name="status_reconfigure">Reconfigure</string>
+
+    <!-- Errors -->
+    <string name="error_connection_failed">Connection failed</string>
+    <string name="error_invalid_url">Invalid server URL</string>
+    <string name="error_invalid_api_key">Invalid API key</string>
+    <string name="error_printer_not_found">Printer not found</string>
+    <string name="error_print_failed">Print failed</string>
+</resources>

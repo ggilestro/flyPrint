@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme (fallback for non-Compose contexts) -->
+    <style name="Theme.FlyPrint" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/flyprint_primary</item>
+    </style>
+</resources>
