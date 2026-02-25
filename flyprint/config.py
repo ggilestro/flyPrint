@@ -11,7 +11,7 @@ DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.json"
 DEFAULT_CACHED_CONFIG_FILE = DEFAULT_CONFIG_DIR / "cached_config.json"
 
 # Default server URL for pairing
-DEFAULT_SERVER_URL = "https://flypush.gilest.ro"
+DEFAULT_SERVER_URL = "https://app.flyroom.net"
 
 
 @dataclass
