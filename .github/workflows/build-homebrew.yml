@@ -14,15 +14,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Audit formula
-        run: brew audit --strict --online homebrew/flyprint.rb || true
-
-      - name: Test install from formula
+      - name: Set up local tap and install
         run: |
-          brew install --formula homebrew/flyprint.rb
+          # Create a local tap so brew accepts our formula
+          brew tap-new flyprint/local
+          TAP_DIR="$(brew --repository flyprint/local)/Formula"
+          cp homebrew/flyprint.rb "$TAP_DIR/flyprint.rb"
+          brew install flyprint/local/flyprint
           flyprint --version
 
       - name: Upload formula

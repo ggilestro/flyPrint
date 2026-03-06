@@ -26,19 +26,21 @@ jobs:
         run: pip install -e ".[windows,gui,build]"
 
       - name: Build with PyInstaller
-        run: pyinstaller windows/flyprint.spec --distpath dist --workpath build/pyinstaller --noconfirm
+        run: |
+          cd windows
+          pyinstaller flyprint.spec --distpath ..\dist --workpath ..\build\pyinstaller --noconfirm
 
       - name: Download SumatraPDF portable
-        run: |
-          mkdir -p dist/FlyPrint/SumatraPDF
-          Invoke-WebRequest -Uri "https://www.sumatrapdfreader.com/dl/rel/3.5.2/SumatraPDF-3.5.2-64.exe" -OutFile "dist/FlyPrint/SumatraPDF/SumatraPDF.exe"
         shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist\FlyPrint\SumatraPDF
+          Invoke-WebRequest -Uri "https://www.sumatrapdfreader.com/dl/rel/3.5.2/SumatraPDF-3.5.2-64.exe" -OutFile "dist\FlyPrint\SumatraPDF\SumatraPDF.exe"
 
       - name: Install Inno Setup
         run: choco install innosetup -y
 
       - name: Build installer
-        run: iscc windows/flyprint.iss
+        run: iscc windows\flyprint.iss
 
       - name: Upload portable build
         uses: actions/upload-artifact@v4

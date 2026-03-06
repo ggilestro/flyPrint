@@ -13,10 +13,11 @@ jobs:
     container: archlinux:base-devel
 
     steps:
-      - name: Set up pacman
+      - name: Set up pacman and dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm git python python-build python-installer python-wheel
+          pacman -S --noconfirm git python python-build python-installer python-wheel \
+            python-click python-requests python-pystray python-pillow python-pycups tk
 
       - uses: actions/checkout@v4
         with:
@@ -24,10 +25,12 @@ jobs:
 
       - name: Build package
         run: |
-          # makepkg refuses to run as root, create a build user
+          # makepkg refuses to run as root — create a build user
           useradd -m builder
           chown -R builder:builder .
-          su builder -c "cd aur && makepkg -sf --noconfirm"
+          # Reason: --nocheck skips test suite, --nodeps skips dep resolution
+          # since we installed deps above as root
+          su builder -c "cd aur && makepkg -sf --noconfirm --nodeps"
 
       - name: Upload package
         uses: actions/upload-artifact@v4
