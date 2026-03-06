@@ -26,8 +26,8 @@ jobs:
         run: pip install -e ".[windows,gui,build]"
 
       - name: Build with PyInstaller
-        working-directory: windows
-        run: pyinstaller flyprint.spec --distpath ..\dist --workpath ..\build\pyinstaller --noconfirm
+        shell: bash
+        run: pyinstaller "$(pwd)/windows/flyprint.spec" --distpath dist --workpath build/pyinstaller --noconfirm
 
       - name: Download SumatraPDF portable
         shell: pwsh
