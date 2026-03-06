@@ -1,51 +1,58 @@
 # FlyPrint
 
-Local print agent for FlyPush label printing.
+Local print agent for [FlyRoom](https://www.flyroom.net) label printing.
 
-FlyPrint is a lightweight agent that runs on local machines (Raspberry Pi, desktop, etc.) and polls your FlyPush server for print jobs. When a job is available, it downloads the label PDF and prints via local CUPS.
+FlyPrint is a lightweight agent that runs on local machines (Raspberry Pi, desktop, etc.) and polls your FlyRoom server for print jobs. When a job is available, it downloads the label PDF and prints it locally.
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.10+
-- CUPS (Common Unix Printing System)
-- A configured printer in CUPS
-
-### Install from source
+### Arch Linux (AUR)
 
 ```bash
-cd flyprint
-pip install .
-
-# Include CUPS support (recommended)
-pip install ".[cups]"
+yay -S flyprint-git
 ```
 
-### Install CUPS (if needed)
+### Debian / Ubuntu / Raspberry Pi
 
-**Debian/Ubuntu/Raspberry Pi:**
+Download the `.deb` from the [latest release](https://github.com/ggilestro/flyPrint/releases):
+
 ```bash
-sudo apt update
-sudo apt install cups python3-cups
+sudo dpkg -i flyprint_*.deb
 ```
 
-**Arch Linux:**
+### macOS (Homebrew)
+
 ```bash
-sudo pacman -S cups python-pycups
+brew tap ggilestro/flyprint
+brew install flyprint
+```
+
+### Windows
+
+Download `FlyPrint-Setup-*.exe` from the [latest release](https://github.com/ggilestro/flyPrint/releases) and run the installer. It includes [SumatraPDF](https://www.sumatrapdfreader.com/) for reliable PDF printing.
+
+For portable use, download the `FlyPrint-Windows-Portable` artifact instead — no installation needed.
+
+### Android
+
+Download `FlyPrint-Android.apk` from the [latest release](https://github.com/ggilestro/flyPrint/releases).
+
+### From source (any platform)
+
+```bash
+pip install ".[cups,gui]"     # Linux/macOS
+pip install ".[windows,gui]"  # Windows
 ```
 
 ## Quick Start
 
-### 1. Configure the agent
+### 1. Pair with your server
 
-Get your API key from FlyPush: Settings > Print Agents > Add Agent
+Start pairing from the FlyRoom web UI (Settings > Labels > Add Agent), then:
 
 ```bash
-flyprint configure \
-  --server https://your-flypush-server.com \
-  --key YOUR_API_KEY \
-  --printer "Your_Printer_Name"
+flyprint pair              # Auto-pairs by IP
+flyprint pair AB3K9X       # Or use the 6-character code
 ```
 
 ### 2. Test the connection
@@ -57,115 +64,135 @@ flyprint test
 ### 3. Start the agent
 
 ```bash
-flyprint start
+flyprint start             # Headless CLI mode
+flyprint gui               # System tray mode
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `flyprint configure` | Set up server URL, API key, and printer |
+| `flyprint pair [CODE]` | Pair with your FlyRoom server |
+| `flyprint configure` | Manual setup (server URL + API key) |
 | `flyprint test` | Test connection to server and printer |
-| `flyprint start` | Start the print agent |
+| `flyprint start` | Start the print agent (headless) |
+| `flyprint gui` | Start with system tray icon |
 | `flyprint status` | Show current configuration |
-| `flyprint printers` | List available CUPS printers |
-| `flyprint install-service` | Install systemd service for auto-start |
+| `flyprint printers` | List available printers |
+| `flyprint install-service` | Install auto-start (systemd/registry) |
 
 ## Running as a Service
 
-For always-on printing (e.g., on a Raspberry Pi), install as a systemd service:
-
-### User service (no root required)
+### Linux (systemd)
 
 ```bash
 flyprint install-service --user
-
-# Enable and start
-systemctl --user daemon-reload
-systemctl --user enable flyprint
-systemctl --user start flyprint
-
-# View logs
-journalctl --user -u flyprint -f
+systemctl --user enable --now flyprint
+journalctl --user -u flyprint -f   # View logs
 ```
 
-### System service (requires root)
+### Windows
 
 ```bash
-flyprint install-service
-# Follow the printed instructions to copy the service file
+flyprint install-service   # Adds to registry Run key
 ```
+
+Or check "Start on Login" during installation, or from the system tray menu.
+
+### macOS
+
+```bash
+brew services start flyprint
+```
+
+## Building & Releasing
+
+FlyPrint builds for 5 platforms via GitHub Actions. All builds trigger automatically on version tags and are also available via manual dispatch.
+
+### Automated release
+
+```bash
+# Bump version in pyproject.toml and flyprint/__init__.py, then:
+git tag v0.2.0
+git push origin master --tags
+```
+
+This creates a draft GitHub Release with artifacts for all platforms attached.
+
+### Manual builds
+
+Each platform has a standalone build script:
+
+| Platform | Build command | Output |
+|----------|--------------|--------|
+| AUR | `cd aur && bash build.sh` | `*.pkg.tar.zst` |
+| Debian | `cd deb && bash build.sh` | `deb/out/*.deb` |
+| Homebrew | `cd homebrew && bash build.sh` | Tests formula |
+| Windows | `windows\build.bat` (on Windows) | `dist\FlyPrint\`, installer `.exe` |
+| Android | `cd flyprint-android && bash build.sh` | `app-debug.apk` |
+| All | `./build_all.sh` | Builds all (skips Windows on Linux) |
+
+### CI workflows
+
+| Workflow | Runner | What it builds |
+|----------|--------|----------------|
+| `build-deb.yml` | Ubuntu (Docker) | `.deb` package |
+| `build-aur.yml` | Arch container | AUR package |
+| `build-windows.yml` | Windows | PyInstaller `.exe` + Inno Setup installer |
+| `build-android.yml` | Ubuntu | Gradle APK |
+| `build-homebrew.yml` | macOS | Formula syntax validation |
+| `release.yml` | All | Orchestrates all builds on tag push |
+
+### Development
+
+```bash
+pip install -e ".[cups,gui,dev]"  # Install in dev mode
+pytest                             # Run tests
+black flyprint/                    # Format
+ruff check flyprint/               # Lint
+```
+
+## Configuration
+
+Configuration is stored in `~/.config/flyprint/`:
+
+- `config.json` — Server URL and API key (user-editable)
+- `cached_config.json` — Operational settings synced from server
 
 ## Printer Setup
 
-### Dymo LabelWriter 400
+### Dymo LabelWriter (Linux/macOS)
 
-1. Install Dymo drivers:
-   ```bash
-   sudo apt install printer-driver-dymo
-   ```
+```bash
+# Debian/Ubuntu
+sudo apt install printer-driver-dymo cups
 
-2. Connect the printer via USB
-
-3. Add to CUPS:
-   ```bash
-   sudo lpadmin -p dymo400 -E -v usb://DYMO/LabelWriter%20400 \
-     -P /usr/share/ppd/dymo/lw400.ppd
-   ```
-
-4. Set as default (optional):
-   ```bash
-   sudo lpoptions -d dymo400
-   ```
-
-### Brother QL Series
-
-Brother QL printers are also supported via CUPS with the `brother-ql` drivers.
-
-## Configuration File
-
-Configuration is stored in `~/.config/flyprint/config.json`:
-
-```json
-{
-  "server_url": "https://your-flypush-server.com",
-  "api_key": "your_api_key",
-  "printer_name": "dymo400",
-  "poll_interval": 5,
-  "label_format": "dymo_11352",
-  "log_level": "INFO"
-}
+# Arch Linux
+sudo pacman -S cups python-pycups
 ```
+
+Connect via USB, then add to CUPS:
+```bash
+sudo lpadmin -p dymo400 -E -v usb://DYMO/LabelWriter%20400 \
+  -P /usr/share/ppd/dymo/lw400.ppd
+```
+
+### Windows
+
+Install the Dymo driver from [dymo.com](https://www.dymo.com/support). FlyPrint uses SumatraPDF (bundled with the installer) for reliable PDF printing with proper page size control.
 
 ## Troubleshooting
 
-### "CUPS not available"
+**"CUPS not available"** (Linux/macOS) — `sudo systemctl status cups`
 
-Make sure CUPS is installed and running:
-```bash
-sudo systemctl status cups
-```
+**"Printer backend not available"** (Windows) — Install pywin32: `pip install pywin32`
 
-### "No printers found"
+**"No printers found"** — `lpstat -p` (Linux) or check Windows printer settings
 
-Check CUPS printer list:
-```bash
-lpstat -p
-```
+**"Server rejected heartbeat"** — Verify API key and server URL
 
-### "Server rejected heartbeat"
-
-- Verify your API key is correct
-- Check that the server URL is accessible
-- Ensure the agent is active in FlyPush settings
-
-### Verbose logging
-
-Run with verbose flag to see more details:
-```bash
-flyprint start --verbose
-```
+**Verbose logging:** `flyprint start --verbose`
 
 ## License
 
-MIT License - see LICENSE file.
+MIT License — see LICENSE file.
