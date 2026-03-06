@@ -4,6 +4,7 @@ __pycache__/
 dist/
 build/
 *.spec
+!windows/flyprint.spec
 aur/src/
 aur/pkg/
 aur/flyprint-git/
