@@ -260,7 +260,7 @@ class BrotherPrinterManager : PrinterManager {
 **Implementation**: SharedPreferences with encryption for sensitive data
 
 **Stored Data:**
-- `server_url: String` - flyPush server URL (e.g., `https://fly.example.com`)
+- `server_url: String` - flyPush server URL (e.g., `https://app.flyroom.net`)
 - `api_key: String` - Agent API key (encrypted)
 - `printer_name: String` - Selected printer name
 - `printer_address: String` - Bluetooth MAC or WiFi IP

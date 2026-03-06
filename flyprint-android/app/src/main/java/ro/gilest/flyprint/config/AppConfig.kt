@@ -18,6 +18,7 @@ class AppConfig(context: Context) {
         private const val TAG = "AppConfig"
         private const val PREFS_NAME = "flyprint_prefs"
         private const val ENCRYPTED_PREFS_NAME = "flyprint_secure"
+        const val DEFAULT_SERVER_URL = "https://app.flyroom.net"
     }
 
     private val prefs: SharedPreferences =
@@ -43,7 +44,7 @@ class AppConfig(context: Context) {
     // --- Core settings (user-configured) ---
 
     var serverUrl: String
-        get() = prefs.getString("server_url", "") ?: ""
+        get() = prefs.getString("server_url", DEFAULT_SERVER_URL) ?: DEFAULT_SERVER_URL
         set(value) = prefs.edit().putString("server_url", normalizeUrl(value)).apply()
 
     var apiKey: String

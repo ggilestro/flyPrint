@@ -101,7 +101,7 @@ class Flyprint < Formula
       To get started:
 
         1. Pair with your FlyRoom server:
-             flyprint pair https://your-server.flyroom.net
+             flyprint pair https://app.flyroom.net
 
         2. Print a test label:
              flyprint test

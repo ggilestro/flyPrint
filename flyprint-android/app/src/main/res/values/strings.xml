@@ -12,7 +12,7 @@
     <!-- Setup Wizard -->
     <string name="setup_title">FlyPrint Setup</string>
     <string name="setup_server_url">Server URL</string>
-    <string name="setup_server_url_hint">https://flypush.example.com</string>
+    <string name="setup_server_url_hint">https://app.flyroom.net</string>
     <string name="setup_api_key">API Key</string>
     <string name="setup_api_key_hint">Paste your agent API key</string>
     <string name="setup_printer">Printer</string>

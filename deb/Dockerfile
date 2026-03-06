@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-COPY build.sh /build.sh
+COPY build_inner.sh /build.sh
 RUN chmod +x /build.sh
 
 ENTRYPOINT ["/build.sh"]
