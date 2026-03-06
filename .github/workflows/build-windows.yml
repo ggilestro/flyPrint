@@ -26,8 +26,12 @@ jobs:
         run: pip install -e ".[windows,gui,build]"
 
       - name: Build with PyInstaller
-        shell: bash
-        run: pyinstaller "$(pwd)/windows/flyprint.spec" --distpath dist --workpath build/pyinstaller --noconfirm
+        shell: pwsh
+        run: |
+          $spec = Join-Path $env:GITHUB_WORKSPACE "windows" "flyprint.spec"
+          Write-Host "Spec file: $spec"
+          Write-Host "Exists: $(Test-Path $spec)"
+          pyinstaller $spec --distpath dist --workpath build\pyinstaller --noconfirm
 
       - name: Download SumatraPDF portable
         shell: pwsh
