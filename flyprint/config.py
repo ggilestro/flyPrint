@@ -2,6 +2,7 @@
 
 import json
 import os
+import platform
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -87,8 +88,9 @@ class FlyPrintConfig:
         with open(path, "w") as f:
             json.dump(core_data, f, indent=2)
 
-        # Secure the config file (contains API key)
-        os.chmod(path, 0o600)
+        # Reason: os.chmod with Unix modes is a no-op/error on Windows
+        if platform.system() != "Windows":
+            os.chmod(path, 0o600)
 
     def save_cached_config(self, cache_path: Path | None = None) -> None:
         """Save operational config to cached_config.json.

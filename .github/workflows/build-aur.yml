@@ -1,0 +1,36 @@
+name: Build AUR Package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+
+    steps:
+      - name: Set up pacman
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git python python-build python-installer python-wheel
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build package
+        run: |
+          # makepkg refuses to run as root, create a build user
+          useradd -m builder
+          chown -R builder:builder .
+          su builder -c "cd aur && makepkg -sf --noconfirm"
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlyPrint-AUR
+          path: aur/*.pkg.tar.*

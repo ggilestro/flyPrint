@@ -1,0 +1,32 @@
+name: Build Homebrew
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Audit formula
+        run: brew audit --strict --online homebrew/flyprint.rb || true
+
+      - name: Test install from formula
+        run: |
+          brew install --formula homebrew/flyprint.rb
+          flyprint --version
+
+      - name: Upload formula
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlyPrint-Homebrew-Formula
+          path: homebrew/flyprint.rb

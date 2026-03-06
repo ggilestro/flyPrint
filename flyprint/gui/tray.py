@@ -31,10 +31,22 @@ def _create_icon_image(connected: bool = False):
 
     # Draw a "P" in white in the center
     try:
+        import platform as _platform
+
         from PIL import ImageFont
 
-        font = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSans-Bold.ttf", 32)
+        # Reason: Each OS has fonts in different locations
+        _system = _platform.system()
+        if _system == "Windows":
+            font_path = "C:/Windows/Fonts/arialbd.ttf"
+        elif _system == "Darwin":
+            font_path = "/System/Library/Fonts/Helvetica.ttc"
+        else:
+            font_path = "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf"
+        font = ImageFont.truetype(font_path, 32)
     except (OSError, ImportError):
+        from PIL import ImageFont
+
         font = ImageFont.load_default()
 
     bbox = draw.textbbox((0, 0), "P", font=font)

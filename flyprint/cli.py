@@ -1,6 +1,7 @@
 """Command-line interface for FlyPrint agent."""
 
 import logging
+import platform
 import sys
 from pathlib import Path
 
@@ -167,7 +168,10 @@ def status():
         else:
             click.echo("No printers found")
     else:
-        click.echo("CUPS not available")
+        if platform.system() == "Windows":
+            click.echo("Printer backend not available. Is pywin32 installed?")
+        else:
+            click.echo("CUPS not available. Is it installed and running?")
 
 
 @main.command()
@@ -241,7 +245,10 @@ def printers():
     click.echo("\n=== Available Printers ===\n")
 
     if not printer.is_available:
-        click.echo("CUPS not available. Is it installed and running?")
+        if platform.system() == "Windows":
+            click.echo("Printer backend not available. Is pywin32 installed?")
+        else:
+            click.echo("CUPS not available. Is it installed and running?")
         sys.exit(1)
 
     printers_list = printer.get_printers()
@@ -263,10 +270,11 @@ def printers():
 @main.command("install-service")
 @click.option("--user", is_flag=True, help="Install as user service (no sudo required)")
 def install_service(user: bool):
-    """Install systemd service for auto-start.
+    """Install auto-start service.
 
-    Creates a systemd service file so FlyPrint starts automatically
-    on boot.
+    On Linux: creates a systemd service file.
+    On Windows: sets a registry Run key for login autostart.
+    On macOS: creates a LaunchAgent plist.
     """
     config = get_config()
 
@@ -274,6 +282,22 @@ def install_service(user: bool):
         click.echo("Error: Agent not configured. Run 'flyprint pair' first.")
         sys.exit(1)
 
+    system = platform.system()
+
+    if system == "Windows":
+        from flyprint.gui.autostart import enable_autostart, is_autostart_enabled
+
+        if is_autostart_enabled():
+            click.echo("FlyPrint is already set to start on login.")
+        else:
+            enable_autostart()
+            click.echo("FlyPrint will now start automatically on login.")
+        click.echo("\nTo disable, run: flyprint install-service --disable")
+        click.echo("Or remove the FlyPrint entry from:")
+        click.echo(r"  HKCU\Software\Microsoft\Windows\CurrentVersion\Run")
+        return
+
+    # Linux/macOS: systemd service
     service_content = f"""[Unit]
 Description=FlyPrint Label Printing Agent
 After=network.target cups.service

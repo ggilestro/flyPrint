@@ -1,0 +1,46 @@
+name: Release All Platforms
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+
+  windows:
+    needs: create-release
+    uses: ./.github/workflows/build-windows.yml
+    permissions:
+      contents: write
+
+  deb:
+    needs: create-release
+    uses: ./.github/workflows/build-deb.yml
+    permissions:
+      contents: write
+
+  homebrew:
+    needs: create-release
+    uses: ./.github/workflows/build-homebrew.yml
+
+  android:
+    needs: create-release
+    uses: ./.github/workflows/build-android.yml
+    permissions:
+      contents: write
+
+  aur:
+    needs: create-release
+    uses: ./.github/workflows/build-aur.yml

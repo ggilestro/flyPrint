@@ -1,6 +1,7 @@
 """FlyPrint agent - polls server for print jobs and prints them."""
 
 import logging
+import platform
 import signal
 import sys
 import time
@@ -39,7 +40,9 @@ class FlyPrintAgent:
 
         # Set up signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._handle_shutdown)
-        signal.signal(signal.SIGTERM, self._handle_shutdown)
+        # Reason: SIGTERM is not a real signal on Windows; only SIGINT works
+        if platform.system() != "Windows":
+            signal.signal(signal.SIGTERM, self._handle_shutdown)
 
     def _handle_shutdown(self, signum, frame):
         """Handle shutdown signals gracefully."""
@@ -329,9 +332,7 @@ class FlyPrintAgent:
         # native DPI (300 for Dymo). PNG at 72 DPI was too low for barcodes.
         pdf_data = self.get_job_pdf(job_id)
         if not pdf_data:
-            self.complete_job(
-                job_id, success=False, error_message="Failed to download label PDF"
-            )
+            self.complete_job(job_id, success=False, error_message="Failed to download label PDF")
             return False
 
         # Mark as printing
@@ -407,7 +408,10 @@ class FlyPrintAgent:
             sys.exit(1)
 
         if not self.printer.is_available:
-            logger.error("No printer available. Is CUPS installed and running?")
+            if platform.system() == "Windows":
+                logger.error("No printer available. Is pywin32 installed?")
+            else:
+                logger.error("No printer available. Is CUPS installed and running?")
             sys.exit(1)
 
         logger.info("Starting FlyPrint agent")
@@ -466,7 +470,7 @@ class FlyPrintAgent:
             else:
                 results["printer"] = {"status": "warning", "message": "No printers found"}
         else:
-            results["printer"] = {"status": "error", "message": "CUPS not available"}
+            results["printer"] = {"status": "error", "message": "Printer backend not available"}
 
         results["success"] = results["server"]["status"] == "ok" and results["printer"][
             "status"
