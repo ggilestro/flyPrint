@@ -9,6 +9,9 @@ class Flyprint < Formula
   head "https://github.com/ggilestro/flyPrint.git", branch: "master"
 
   depends_on "python@3.13"
+  depends_on "jpeg-turbo"  # For Pillow
+  depends_on "libtiff"     # For Pillow
+  depends_on "little-cms2" # For Pillow
   depends_on :macos # CUPS is built-in on macOS
 
   # --- Core dependencies ---
