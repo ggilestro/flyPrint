@@ -6,6 +6,15 @@ on:
       - "v*"
   workflow_dispatch:
   workflow_call:
+    secrets:
+      KEYSTORE_BASE64:
+        required: false
+      KEYSTORE_PASSWORD:
+        required: false
+      KEY_ALIAS:
+        required: false
+      KEY_PASSWORD:
+        required: false
 
 permissions:
   contents: write
@@ -29,16 +38,42 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Decode signing keystore
+        if: env.KEYSTORE_BASE64 != ''
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/flyprint-release.keystore
+          echo "KEYSTORE_FILE=/tmp/flyprint-release.keystore" >> "$GITHUB_ENV"
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> "$GITHUB_ENV"
+
       - name: Generate Gradle wrapper and build APK
         working-directory: flyprint-android
         run: |
           gradle wrapper
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          if [ -n "$KEYSTORE_FILE" ]; then
+            echo "Building signed release APK"
+            ./gradlew assembleRelease --no-daemon
+          else
+            echo "No signing key — building debug APK"
+            ./gradlew assembleDebug --no-daemon
+          fi
 
-      - name: Find APK
+      - name: Rename APK
         id: apk
-        run: echo "path=$(find flyprint-android -name '*.apk' -type f | head -1)" >> "$GITHUB_OUTPUT"
+        run: |
+          # Extract version from tag or default
+          VERSION="${GITHUB_REF_NAME#v}"
+          [ -z "$VERSION" ] && VERSION="dev"
+
+          # Find the built APK (release or debug)
+          SRC=$(find flyprint-android -name '*.apk' -type f | head -1)
+          DEST="flyprint-${VERSION}.apk"
+          cp "$SRC" "$DEST"
+          echo "path=$DEST" >> "$GITHUB_OUTPUT"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
