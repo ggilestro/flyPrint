@@ -44,7 +44,11 @@ def do_pairing(
         if printer.is_available:
             for p in printer.get_printers():
                 available_printers.append(
-                    {"name": p["name"], "is_default": p.get("is_default", False)}
+                    {
+                        "name": p["name"],
+                        "is_default": p.get("is_default", False),
+                        "make_and_model": p.get("make_and_model", ""),
+                    }
                 )
     except Exception:
         pass

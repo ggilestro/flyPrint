@@ -101,7 +101,14 @@ class FlyPrintAgent:
         """
         try:
             printers = self.printer.get_printers()
-            return [{"name": p["name"], "is_default": p.get("is_default", False)} for p in printers]
+            return [
+                {
+                    "name": p["name"],
+                    "is_default": p.get("is_default", False),
+                    "make_and_model": p.get("make_and_model", ""),
+                }
+                for p in printers
+            ]
         except Exception:
             return []
 

@@ -73,6 +73,7 @@ class CupsPrinter:
                         "state": info.get("printer-state", 0),
                         "state_message": info.get("printer-state-message", ""),
                         "is_default": info.get("printer-is-default", False),
+                        "make_and_model": info.get("printer-make-and-model", ""),
                     }
                     for name, info in printers.items()
                 ]
