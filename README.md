@@ -159,6 +159,15 @@ Configuration is stored in `~/.config/flyprint/`:
 - `config.json` — Server URL and API key (user-editable)
 - `cached_config.json` — Operational settings synced from server
 
+## Supported Printers
+
+FlyPrint auto-detects label printers during pairing and configures the correct label format and page size automatically. After pairing, you'll be prompted to verify the detected settings.
+
+| Printer | Label Format | Page Size | Status |
+|---------|-------------|-----------|--------|
+| Dymo LabelWriter (400, 450, etc.) | `dymo_11352` (54x25mm) | `w72h154` | Fully supported |
+| Brother QL-700 | `brother_dk22205` (62x25mm) | `62x29` | Fully supported |
+
 ## Printer Setup
 
 ### Dymo LabelWriter (Linux/macOS)
@@ -176,6 +185,25 @@ Connect via USB, then add to CUPS:
 sudo lpadmin -p dymo400 -E -v usb://DYMO/LabelWriter%20400 \
   -P /usr/share/ppd/dymo/lw400.ppd
 ```
+
+### Brother QL-700 (Linux)
+
+```bash
+# Arch Linux (AUR)
+yay -S brother-ql700
+
+# Requires ghostscript (for the Brother CUPS filter)
+sudo pacman -S ghostscript
+```
+
+After installing, power-cycle the printer (unplug USB, wait, replug), then add to CUPS:
+```bash
+lpadmin -p QL-700 -E \
+  -v "usb://Brother/QL-700?serial=YOUR_SERIAL" \
+  -m brother_ql700_printer_en.ppd
+```
+
+Find your USB URI with `lpinfo -v | grep Brother`.
 
 ### Windows
 
