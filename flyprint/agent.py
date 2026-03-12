@@ -128,6 +128,7 @@ class FlyPrintAgent:
                     "printer_name": self.config.printer_name,
                     "printer_status": printer_status,
                     "available_printers": available_printers,
+                    "machine_id": self.config.machine_id or None,
                 },
                 timeout=10,
             )

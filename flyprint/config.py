@@ -3,6 +3,7 @@
 import json
 import os
 import platform
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,6 +37,7 @@ class FlyPrintConfig:
 
     server_url: str = ""
     api_key: str = ""
+    machine_id: str = ""
     printer_name: str | None = None
     poll_interval: int = 5
     label_format: str = "dymo_11352"
@@ -83,6 +85,7 @@ class FlyPrintConfig:
         core_data = {
             "server_url": self._normalize_url(self.server_url),
             "api_key": self.api_key,
+            "machine_id": self.machine_id,
         }
 
         with open(path, "w") as f:
@@ -173,6 +176,7 @@ class FlyPrintConfig:
         config = cls(
             server_url=cls._normalize_url(raw_url) if raw_url else "",
             api_key=data.get("api_key", ""),
+            machine_id=data.get("machine_id", ""),
             printer_name=data.get("printer_name"),
             poll_interval=data.get("poll_interval", 5),
             label_format=data.get("label_format", "dymo_11352"),
@@ -183,6 +187,11 @@ class FlyPrintConfig:
             cups_page=data.get("cups_page", "w72h154"),
             config_version=data.get("config_version", 0),
         )
+
+        # Generate and persist machine_id if missing
+        if not config.machine_id:
+            config.machine_id = str(uuid.uuid4())
+            config.save(path)
 
         # Overlay cached config if it exists (new format)
         cache_path = path.parent / "cached_config.json"

@@ -8,7 +8,7 @@ from tkinter import messagebox
 
 import requests
 
-from flyprint.config import DEFAULT_SERVER_URL, FlyPrintConfig
+from flyprint.config import DEFAULT_SERVER_URL, FlyPrintConfig, get_config
 from flyprint.printing import get_printer
 
 logger = logging.getLogger(__name__)
@@ -37,6 +37,15 @@ def do_pairing(
     hostname = platform.node()
     server_url = server_url.rstrip("/")
 
+    # Load or generate machine_id
+    existing_config = get_config()
+    if existing_config.machine_id:
+        machine_id = existing_config.machine_id
+    else:
+        import uuid
+
+        machine_id = str(uuid.uuid4())
+
     # Gather available printers
     available_printers = []
     try:
@@ -59,6 +68,7 @@ def do_pairing(
             "code": code or None,
             "hostname": hostname,
             "available_printers": available_printers,
+            "machine_id": machine_id,
         },
         timeout=15,
     )
@@ -196,9 +206,13 @@ class PairingDialog:
         try:
             result = do_pairing(server_url, code)
             if result:
+                existing = get_config()
+                # Keep existing API key if already configured (re-pair scenario)
+                api_key = existing.api_key if existing.is_configured() else result["api_key"]
                 config = FlyPrintConfig(
                     server_url=server_url.rstrip("/"),
-                    api_key=result["api_key"],
+                    api_key=api_key,
+                    machine_id=existing.machine_id or result.get("machine_id", ""),
                 )
                 config.save()
                 self.result = config
