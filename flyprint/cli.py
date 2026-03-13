@@ -107,11 +107,9 @@ def pair(code: str | None, server: str):
     try:
         result = do_pairing(server_url, code)
         existing = get_config()
-        # Keep existing API key if already configured (re-pair scenario)
-        api_key = existing.api_key if existing.is_configured() else result["api_key"]
         config = FlyPrintConfig(
             server_url=server_url,
-            api_key=api_key,
+            api_key=result["api_key"],
             machine_id=existing.machine_id or result.get("machine_id", ""),
         )
         config.save()
